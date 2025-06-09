@@ -10,7 +10,8 @@ from app.rbac.schemas import (
 )
 from app.users.services import UserService
 from app.users.schemas import UserCreate, UserUpdate
-from .schemas import RoleResponse, PermissionResponse, UserRoleCreate, RolePermissionCreate, UserResponse
+from app.auth.schemas import UserResponse
+from .schemas import RoleResponse, PermissionResponse, UserRoleCreate, RolePermissionCreate
 
 
 router = APIRouter()

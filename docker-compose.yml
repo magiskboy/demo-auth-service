@@ -9,9 +9,13 @@ services:
       - oauth-network
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       migration:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     deploy:
       replicas: ${API_REPLICAS:-1}
@@ -34,6 +38,8 @@ services:
       - oauth-network
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,6 +72,27 @@ services:
           memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  redis:
+    image: redis:8
+    ports:
+      - "6379:6379"
+    networks:
+      - oauth-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    volumes:
+      - .data/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
       interval: 30s
       timeout: 10s
       retries: 3

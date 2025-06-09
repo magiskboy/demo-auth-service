@@ -18,7 +18,7 @@ class Role(OAuthBaseModel, table=True):
 class Permission(OAuthBaseModel, table=True):
     __tablename__ = "permissions"
     
-    name: str = Field(unique=True)
+    name: str = Field(unique=True, description="have format '<HTTP method>:<path>' like 'GET:/api/v1/users'")
     description: str = Field(default="")
 
 

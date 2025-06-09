@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: 4ee3bff2b057
+Revision ID: 88676bfc3768
 Revises: 
-Create Date: 2025-06-09 23:02:49.095227
+Create Date: 2025-06-10 01:11:53.445442
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4ee3bff2b057'
+revision: str = '88676bfc3768'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -59,6 +59,25 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_users_created_at'), 'users', ['created_at'], unique=False)
     op.create_index(op.f('ix_users_updated_at'), 'users', ['updated_at'], unique=False)
+    op.create_table('linked_accounts',
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.Column('provider', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('given_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('family_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('picture', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('email', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
+    sa.Column('sub', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_linked_accounts_created_at'), 'linked_accounts', ['created_at'], unique=False)
+    op.create_index(op.f('ix_linked_accounts_provider'), 'linked_accounts', ['provider'], unique=False)
+    op.create_index(op.f('ix_linked_accounts_sub'), 'linked_accounts', ['sub'], unique=False)
+    op.create_index(op.f('ix_linked_accounts_updated_at'), 'linked_accounts', ['updated_at'], unique=False)
     op.create_table('role_permissions',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -95,6 +114,11 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_role_permissions_updated_at'), table_name='role_permissions')
     op.drop_index(op.f('ix_role_permissions_created_at'), table_name='role_permissions')
     op.drop_table('role_permissions')
+    op.drop_index(op.f('ix_linked_accounts_updated_at'), table_name='linked_accounts')
+    op.drop_index(op.f('ix_linked_accounts_sub'), table_name='linked_accounts')
+    op.drop_index(op.f('ix_linked_accounts_provider'), table_name='linked_accounts')
+    op.drop_index(op.f('ix_linked_accounts_created_at'), table_name='linked_accounts')
+    op.drop_table('linked_accounts')
     op.drop_index(op.f('ix_users_updated_at'), table_name='users')
     op.drop_index(op.f('ix_users_created_at'), table_name='users')
     op.drop_table('users')
