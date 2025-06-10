@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
+from uuid import UUID
 from pydantic import BaseModel
 
 
@@ -15,11 +16,9 @@ class TokenData(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: UUID
     email: str
     name: str
     is_active: bool
     is_verified: bool
     is_deleted: bool
-    roles: List[str]
-    permissions: List[str]

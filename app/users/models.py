@@ -1,10 +1,8 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 from uuid import UUID
 from sqlmodel import Field, Relationship
 from app.core.db import OAuthBaseModel
-
-if TYPE_CHECKING:
-    from app.rbac.models import Role
+from app.rbac.models import Role, UserRole
 
 
 class User(OAuthBaseModel, table=True):
@@ -17,7 +15,7 @@ class User(OAuthBaseModel, table=True):
     password: str = Field(default="")
     is_deleted: bool = Field(default=False)
     
-    roles: List["Role"] = Relationship(back_populates="users")
+    roles: List["Role"] = Relationship(back_populates="users", link_model=UserRole)
     linked_accounts: List["LinkedAccount"] = Relationship(back_populates="user")
 
 

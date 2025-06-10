@@ -18,7 +18,7 @@ engine = create_async_engine(
     max_overflow=10,
     pool_timeout=30,
     pool_recycle=1800,  # Recycle connections after 30 minutes
-    pool_pre_ping=True  # Verify connection is still alive before using
+    pool_pre_ping=True,  # Verify connection is still alive before using
 )
 async_session = async_sessionmaker(engine, expire_on_commit=False)  # support multiple commits
 

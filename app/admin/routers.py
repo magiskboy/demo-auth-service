@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.core.db import get_db
+from app.rbac.models import RolePermission, UserRole
 from app.rbac.services import RoleService, PermissionService, RBACService
 from app.rbac.schemas import (
     RoleCreate, RoleUpdate, RoleFilter,
@@ -84,7 +85,15 @@ async def create_user(
     db: AsyncSession = Depends(get_db)
 ):
     user_service = UserService(db)
-    return await user_service.create_user(user)
+    user = await user_service.create_user(user)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "is_active": user.is_active,
+        "is_verified": user.is_verified,
+        "is_deleted": user.is_deleted,
+    }
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
@@ -133,7 +142,7 @@ async def delete_user(
 
 
 # RBAC endpoints
-@router.post("/users/{user_id}/roles", status_code=status.HTTP_201_CREATED)
+@router.post("/users/{user_id}/roles", response_model=UserRole, status_code=status.HTTP_201_CREATED)
 async def assign_role_to_user(
     user_id: str,
     role_assignment: UserRoleCreate,
@@ -143,7 +152,7 @@ async def assign_role_to_user(
     return await rbac_service.assign_role_to_user(user_id, role_assignment.role_id)
 
 
-@router.post("/roles/{role_id}/permissions", status_code=status.HTTP_201_CREATED)
+@router.post("/roles/{role_id}/permissions", response_model=RolePermission, status_code=status.HTTP_201_CREATED)
 async def assign_permission_to_role(
     role_id: str,
     permission_assignment: RolePermissionCreate,

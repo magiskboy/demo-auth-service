@@ -1,34 +1,33 @@
-from typing import List
+from uuid import UUID
 from pydantic import BaseModel
 
 
 class RoleResponse(BaseModel):
-    id: str
+    id: UUID
     name: str
     description: str
 
 
 class PermissionResponse(BaseModel):
-    id: str
+    id: UUID
     name: str
     description: str
 
 
 class UserRoleCreate(BaseModel):
-    user_id: str
-    role_id: str
+    user_id: UUID
+    role_id: UUID
 
 
 class RolePermissionCreate(BaseModel):
-    role_id: str
-    permission_id: str
+    role_id: UUID
+    permission_id: UUID
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: UUID
     email: str
     name: str
     is_active: bool
     is_verified: bool
     is_deleted: bool
-    roles: List[RoleResponse]
