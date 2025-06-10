@@ -1,17 +1,15 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.users.models import User, LinkedAccount
 from app.users.services import UserService
-from app.users.schemas import UserCreate, UserUpdate, LinkedAccountCreate
+from app.users.schemas import UserCreate
 
 # Import factories
 from tests.factories import (
     UserFactory, VerifiedUserFactory, AdminUserFactory,
     LinkedAccountFactory, GoogleLinkedAccountFactory,
-    create_user_create_schema, create_user_update_schema, 
-    create_linked_account_create_schema, create_multiple_users
+    create_user_create_schema, create_linked_account_create_schema
 )
 
 

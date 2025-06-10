@@ -13,7 +13,7 @@ from tests.factories import (
     LinkedAccountFactory, GoogleLinkedAccountFactory,
     RoleFactory, AdminRoleFactory, UserManagerRoleFactory, ViewerRoleFactory,
     PermissionFactory, UserPermissionFactory, AdminPermissionFactory,
-    UserRoleFactory, RolePermissionFactory,
+    UserRoleFactory,
     create_user_create_schema, create_multiple_users,
     create_complete_oauth_scenario, create_sso_test_scenario, create_rbac_test_scenario,
     create_standard_permissions, create_standard_roles

@@ -14,21 +14,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 
-from app.core.db import OAuthBaseModel
-from app.users.models import User, LinkedAccount
-from app.rbac.models import Role, Permission, UserRole, RolePermission
+from app.users.models import User
+from app.rbac.models import Role, Permission
 from app.users.services import UserService
 from app.rbac.services import RoleService, PermissionService, RBACService
-from app.users.schemas import UserCreate, UserUpdate, LinkedAccountCreate
-from app.rbac.schemas import RoleCreate, PermissionCreate, RoleUpdate, PermissionUpdate, RoleFilter, PermissionFilter
+from app.users.schemas import UserCreate, LinkedAccountCreate
+from app.rbac.schemas import RoleCreate, PermissionCreate
 
 # Import factories
 from tests.factories import (
     UserFactory, VerifiedUserFactory, AdminUserFactory,
     LinkedAccountFactory, GoogleLinkedAccountFactory,
-    RoleFactory, AdminRoleFactory, UserManagerRoleFactory, ViewerRoleFactory,
-    PermissionFactory, UserPermissionFactory, AdminPermissionFactory,
-    UserRoleFactory, RolePermissionFactory,
+    RoleFactory,
+    PermissionFactory,
     create_user_create_schema, create_role_create_schema, create_permission_create_schema,
     create_linked_account_create_schema, create_standard_permissions, create_standard_roles,
     create_complete_oauth_scenario, create_sso_test_scenario, create_rbac_test_scenario

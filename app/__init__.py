@@ -8,10 +8,13 @@ from app.core import settings
 from app.core.db import engine
 from sqlalchemy import text
 from app.core.redis import get_redis
+from app.core.logging import setup_logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
+
     async with engine.begin() as conn:
         await conn.execute(text('SELECT 1'))
     redis = get_redis()
@@ -21,7 +24,7 @@ async def lifespan(app: FastAPI):
 
     await engine.dispose()
 
-    
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="OAuth",

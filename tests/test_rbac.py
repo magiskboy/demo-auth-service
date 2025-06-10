@@ -1,10 +1,9 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.rbac.models import Role, Permission, UserRole, RolePermission
 from app.rbac.services import RoleService, PermissionService, RBACService
-from app.rbac.schemas import RoleCreate, PermissionCreate, RoleUpdate, PermissionUpdate, RoleFilter, PermissionFilter
+from app.rbac.schemas import RoleCreate, PermissionCreate, RoleFilter, PermissionFilter
 
 # Import factories
 from tests.factories import (
