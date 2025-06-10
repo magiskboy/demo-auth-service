@@ -1,13 +1,13 @@
 # Dịch Vụ OAuth2
 
-Một dịch vụ xác thực và ủy quyền OAuth2 toàn diện được xây dựng với FastAPI, tích hợp Single Sign-On (SSO), Kiểm soát Truy cập Dựa trên Vai trò (RBAC), và các thực hành bảo mật hiện đại.
+Một dịch vụ xác thực và ủy quyền OAuth2 toàn diện được xây dựng với FastAPI, tích hợp Single Sign-On (SSO), Kiểm soát Truy cập Dựa trên Role (RBAC), và các thực hành bảo mật hiện đại.
 
 ## Tính Năng
 
 ### Xác Thực & Ủy Quyền
 - **Triển khai OAuth2**: Máy chủ ủy quyền OAuth2 đầy đủ với access token và refresh token
 - **Đăng nhập một lần (SSO)**: Tích hợp Google OAuth2 với khả năng mở rộng cho các nhà cung cấp khác
-- **Kiểm soát Truy cập Dựa trên Vai trò (RBAC)**: Hệ thống quản lý quyền hạn và vai trò linh hoạt
+- **Kiểm soát Truy cập Dựa trên Role (RBAC)**: Hệ thống quản lý quyền hạn và role linh hoạt
 - **Quản lý JWT Token**: Tạo, xác thực và vô hiệu hóa token an toàn
 - **Bảo mật Mật khẩu**: Mã hóa BCrypt với salt để lưu trữ mật khẩu an toàn
 
@@ -18,10 +18,10 @@ Một dịch vụ xác thực và ủy quyền OAuth2 toàn diện được xây
 - **Kiểm soát Trạng thái Tài khoản**: Kích hoạt/vô hiệu hóa người dùng và xóa mềm
 
 ### Giao diện Quản trị
-- **Quản lý Vai trò**: Tạo, cập nhật và gán vai trò cho người dùng
+- **Quản lý Role**: Tạo, cập nhật và gán role cho người dùng
 - **Quản lý Quyền hạn**: Định nghĩa quyền hạn chi tiết cho các API endpoint
 - **Quản trị Người dùng**: Các thao tác CRUD đầy đủ cho quản lý người dùng
-- **Gán RBAC**: Gán vai trò cho người dùng và quyền hạn cho vai trò
+- **Gán RBAC**: Gán role cho người dùng và quyền hạn cho role
 
 ### Tính năng Bảo mật
 - **Vô hiệu hóa Token**: Thu hồi token dựa trên Redis để đăng xuất an toàn
@@ -46,7 +46,7 @@ Một dịch vụ xác thực và ủy quyền OAuth2 toàn diện được xây
 app/
 ├── auth/          # Xác thực OAuth2 và SSO
 ├── users/         # Quản lý người dùng và hồ sơ
-├── rbac/          # Kiểm soát Truy cập Dựa trên Vai trò
+├── rbac/          # Kiểm soát Truy cập Dựa trên Role
 ├── admin/         # Chức năng quản trị
 └── core/          # Cơ sở dữ liệu, Redis và cài đặt
 ```
@@ -54,10 +54,10 @@ app/
 ### Lược đồ Cơ sở dữ liệu
 - **Users**: Thông tin người dùng cốt lõi với dữ liệu xác thực
 - **Linked Accounts**: Liên kết tài khoản nhà cung cấp OAuth
-- **Roles**: Vai trò có tên với mô tả
+- **Roles**: Role có tên với mô tả
 - **Permissions**: Quyền hạn chi tiết cho API endpoint
-- **User Roles**: Gán vai trò cho người dùng (many-to-many)
-- **Role Permissions**: Gán quyền hạn cho vai trò (many-to-many)
+- **User Roles**: Gán role cho người dùng (many-to-many)
+- **Role Permissions**: Gán quyền hạn cho role (many-to-many)
 
 ### API Endpoints
 
@@ -75,14 +75,14 @@ app/
 - Các endpoint quản lý hồ sơ người dùng
 
 #### Quản trị (`/api/v1/admin`)
-- `POST /roles` - Tạo vai trò
-- `GET /roles` - Liệt kê vai trò với bộ lọc
-- `PUT /roles/{id}` - Cập nhật vai trò
+- `POST /roles` - Tạo role
+- `GET /roles` - Liệt kê role với bộ lọc
+- `PUT /roles/{id}` - Cập nhật role
 - `POST /permissions` - Tạo quyền hạn
 - `GET /permissions` - Liệt kê quyền hạn với bộ lọc
 - `PUT /permissions/{id}` - Cập nhật quyền hạn
-- `POST /users/{id}/roles` - Gán vai trò cho người dùng
-- `POST /roles/{id}/permissions` - Gán quyền hạn cho vai trò
+- `POST /users/{id}/roles` - Gán role cho người dùng
+- `POST /roles/{id}/permissions` - Gán quyền hạn cho role
 
 ### Luồng OAuth2
 1. **Yêu cầu Ủy quyền**: Client chuyển hướng đến `/auth/login/google`
@@ -94,13 +94,13 @@ app/
 
 ### Triển khai RBAC
 - **Quyền hạn Phân cấp**: Quyền hạn định nghĩa quyền truy cập vào API endpoint cụ thể
-- **Thành phần Vai trò**: Vai trò là tập hợp các quyền hạn
-- **Gán Người dùng**: Người dùng có thể có nhiều vai trò
+- **Thành phần Role**: Role là tập hợp các quyền hạn
+- **Gán Người dùng**: Người dùng có thể có nhiều role
 - **Ủy quyền Động**: Middleware xác thực quyền hạn cho mỗi request
 
 ## Phát triển
 
-### Yêu cầu Tiên quyết
+### Yêu cầu
 - Python 3.11+
 - PostgreSQL 12+
 - Redis 6+
@@ -174,12 +174,11 @@ Có thể thêm các nhà cung cấp khác trong `app/auth/sso_config.py` theo c
 - Access token có thời gian hết hạn ngắn (mặc định: 30 phút)
 - Refresh token có thời gian hết hạn dài hơn (mặc định: 7 ngày)
 - Vô hiệu hóa token ngăn chặn sử dụng sau khi đăng xuất
-- Lưu trữ token dựa trên Redis để thu hồi
 
 ### Mô hình Quyền hạn
 - Quyền hạn tuân theo pattern REST endpoint: `{METHOD}:{PATH}`
 - Kiểm soát chi tiết quyền truy cập API
-- Tổng hợp dựa trên vai trò để quản lý dễ dàng hơn
+- Tổng hợp dựa trên role để quản lý dễ dàng hơn
 
 ### Bảo vệ Dữ liệu
 - Mã hóa mật khẩu với BCrypt

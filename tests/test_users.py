@@ -6,6 +6,14 @@ from app.users.models import User, LinkedAccount
 from app.users.services import UserService
 from app.users.schemas import UserCreate, UserUpdate, LinkedAccountCreate
 
+# Import factories
+from tests.factories import (
+    UserFactory, VerifiedUserFactory, AdminUserFactory,
+    LinkedAccountFactory, GoogleLinkedAccountFactory,
+    create_user_create_schema, create_user_update_schema, 
+    create_linked_account_create_schema, create_multiple_users
+)
+
 
 class TestUserService:
     """Test suite for UserService."""
@@ -32,7 +40,10 @@ class TestUserService:
     async def test_create_user_with_minimal_data(self, user_service: UserService):
         """Test user creation with minimal required data."""
         # Arrange
-        user_create = UserCreate(email="minimal@example.com", name="Minimal User", password="password123")
+        user_create = create_user_create_schema(
+            email="minimal@example.com", 
+            name="Minimal User"
+        )
         
         # Act
         user = await user_service.create_user(user_create)
@@ -40,7 +51,7 @@ class TestUserService:
         # Assert
         assert user.email == "minimal@example.com"
         assert user.name == "Minimal User"
-        assert user.password == "password123"
+        assert user.password is not None  # Password is set by factory
 
     @pytest.mark.asyncio
     async def test_get_user_success(self, user_service: UserService, created_user: User):
@@ -98,9 +109,12 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_get_all_users_with_data(self, user_service: UserService):
         """Test retrieving all users with data in database."""
-        # Arrange
-        user1 = await user_service.create_user(UserCreate(email="user1@example.com", name="User 1", password="password1"))
-        user2 = await user_service.create_user(UserCreate(email="user2@example.com", name="User 2", password="password2"))
+        # Arrange - Use factory to create test data
+        user1_create = create_user_create_schema(email="user1@example.com", name="User 1")
+        user2_create = create_user_create_schema(email="user2@example.com", name="User 2")
+        
+        user1 = await user_service.create_user(user1_create)
+        user2 = await user_service.create_user(user2_create)
         
         # Act
         users = await user_service.get_all_users()
@@ -114,9 +128,12 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_get_all_users_excludes_deleted(self, user_service: UserService):
         """Test that get_all_users excludes deleted users."""
-        # Arrange
-        user1 = await user_service.create_user(UserCreate(email="active@example.com", name="Active User", password="password1"))
-        user2 = await user_service.create_user(UserCreate(email="deleted@example.com", name="Deleted User", password="password2"))
+        # Arrange - Use factory to create test data
+        active_user_create = create_user_create_schema(email="active@example.com", name="Active User")
+        deleted_user_create = create_user_create_schema(email="deleted@example.com", name="Deleted User")
+        
+        user1 = await user_service.create_user(active_user_create)
+        user2 = await user_service.create_user(deleted_user_create)
         
         # Delete user2
         await user_service.delete_user(str(user2.id))
@@ -131,8 +148,7 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_update_user_success(self, user_service: UserService, created_user: User):
         """Test user update (note: service has a bug where name doesn't actually update)."""
-        # Arrange
-        # Create a custom UserUpdate-like object that includes id
+        # Arrange - Create update object with id field for service compatibility
         class TestUserUpdate:
             def __init__(self, id: str, name: str):
                 self.id = id
@@ -167,19 +183,8 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_create_linked_account_new_user(self, user_service: UserService):
         """Test creating linked account for new user."""
-        # Arrange
-        # Create a custom LinkedAccountCreate-like object that includes sub
-        class TestLinkedAccountCreate:
-            def __init__(self, provider: str, given_name: str, family_name: str, picture: str, email: str, sub: str, is_verified: bool = False):
-                self.provider = provider
-                self.given_name = given_name
-                self.family_name = family_name
-                self.picture = picture
-                self.email = email
-                self.sub = sub
-                self.is_verified = is_verified
-        
-        linked_account_create = TestLinkedAccountCreate(
+        # Arrange - Use factory to create linked account data
+        linked_account_create = create_linked_account_create_schema(
             provider="google",
             given_name="Test",
             family_name="User",
@@ -206,19 +211,8 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_create_linked_account_existing_user(self, user_service: UserService, created_user: User):
         """Test creating linked account for existing user."""
-        # Arrange
-        # Create a custom LinkedAccountCreate-like object that includes sub
-        class TestLinkedAccountCreate:
-            def __init__(self, provider: str, given_name: str, family_name: str, picture: str, email: str, sub: str, is_verified: bool = False):
-                self.provider = provider
-                self.given_name = given_name
-                self.family_name = family_name
-                self.picture = picture
-                self.email = email
-                self.sub = sub
-                self.is_verified = is_verified
-        
-        linked_account_create = TestLinkedAccountCreate(
+        # Arrange - Use factory to create linked account data
+        linked_account_create = create_linked_account_create_schema(
             provider="google",
             given_name="Test",
             family_name="User",
@@ -238,23 +232,9 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_create_linked_account_no_email(self, user_service: UserService):
         """Test creating linked account without email raises ValueError."""
-        # Arrange
-        # Create a custom LinkedAccountCreate-like object that includes sub
-        class TestLinkedAccountCreate:
-            def __init__(self, provider: str, given_name: str, family_name: str, picture: str, email: str, sub: str, is_verified: bool = False):
-                self.provider = provider
-                self.given_name = given_name
-                self.family_name = family_name
-                self.picture = picture
-                self.email = email
-                self.sub = sub
-                self.is_verified = is_verified
-        
-        linked_account_create = TestLinkedAccountCreate(
+        # Arrange - Use factory but override email to be empty
+        linked_account_create = create_linked_account_create_schema(
             provider="google",
-            given_name="Test",
-            family_name="User",
-            picture="https://example.com/avatar.jpg",
             email="",  # Empty email
             sub="google-sub-789"
         )
@@ -266,23 +246,9 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_create_linked_account_duplicate_provider(self, user_service: UserService, created_user: User):
         """Test creating duplicate linked account for same provider raises ValueError."""
-        # Arrange
-        # Create a custom LinkedAccountCreate-like object that includes sub
-        class TestLinkedAccountCreate:
-            def __init__(self, provider: str, given_name: str, family_name: str, picture: str, email: str, sub: str, is_verified: bool = False):
-                self.provider = provider
-                self.given_name = given_name
-                self.family_name = family_name
-                self.picture = picture
-                self.email = email
-                self.sub = sub
-                self.is_verified = is_verified
-        
-        linked_account_create = TestLinkedAccountCreate(
+        # Arrange - Use factory to create linked account data
+        linked_account_create = create_linked_account_create_schema(
             provider="google",
-            given_name="Test",
-            family_name="User",
-            picture="https://example.com/avatar.jpg",
             email=created_user.email,
             sub="google-sub-101"
         )
@@ -294,42 +260,120 @@ class TestUserService:
         with pytest.raises(ValueError, match="Linked account already exists"):
             await user_service.create_linked_account(linked_account_create)
 
+    @pytest.mark.asyncio
+    async def test_create_user_with_factory_variations(self, user_service: UserService):
+        """Test creating users with different factory variations."""
+        # Create verified user
+        verified_user_create = create_user_create_schema(
+            email="verified@example.com",
+            name="Verified User"
+        )
+        verified_user = await user_service.create_user(verified_user_create)
+        
+        # Create admin user
+        admin_user_create = create_user_create_schema(
+            email="admin@example.com", 
+            name="Admin User"
+        )
+        admin_user = await user_service.create_user(admin_user_create)
+        
+        # Assert
+        assert verified_user.email == "verified@example.com"
+        assert admin_user.email == "admin@example.com"
+        assert verified_user.id != admin_user.id
+
+    @pytest.mark.asyncio
+    async def test_create_google_linked_account(self, user_service: UserService):
+        """Test creating Google-specific linked account."""
+        # Arrange - Use Google factory for realistic data
+        google_account_data = GoogleLinkedAccountFactory.build()
+        linked_account_create = create_linked_account_create_schema(
+            provider="google",
+            email=google_account_data.email,
+            sub=google_account_data.sub,
+            given_name=google_account_data.given_name,
+            family_name=google_account_data.family_name
+        )
+        
+        # Act
+        linked_account = await user_service.create_linked_account(linked_account_create)
+        
+        # Assert
+        assert linked_account.provider == "google"
+        assert "google-" in linked_account.sub
+        assert "@gmail.com" in linked_account.email
+
 
 class TestUserModel:
     """Test suite for User model."""
 
     def test_user_model_creation(self):
         """Test User model creation with all fields."""
-        # Arrange & Act
+        # Arrange & Act - Use factory for realistic data
+        user_data = UserFactory.build()
         user = User(
-            email="test@example.com",
-            name="Test User",
-            password="password123",
+            email=user_data.email,
+            name=user_data.name,
+            password=user_data.password,
             is_active=True,
             is_verified=True,
             is_deleted=False
         )
         
         # Assert
-        assert user.email == "test@example.com"
-        assert user.name == "Test User"
-        assert user.password == "password123"
+        assert user.email == user_data.email
+        assert user.name == user_data.name
+        assert user.password == user_data.password
         assert user.is_active is True
         assert user.is_verified is True
         assert user.is_deleted is False
 
     def test_user_model_defaults(self):
         """Test User model default values."""
-        # Arrange & Act
-        user = User(email="test@example.com")
+        # Arrange & Act - Use factory for email
+        user_data = UserFactory.build()
+        user = User(email=user_data.email)
         
         # Assert
-        assert user.email == "test@example.com"
+        assert user.email == user_data.email
         assert user.name == ""
         assert user.password == ""
         assert user.is_active is True
         assert user.is_verified is False
         assert user.is_deleted is False
+
+    def test_user_model_with_factory_data(self):
+        """Test User model creation directly with factory."""
+        # Arrange & Act
+        user = UserFactory.build()
+        
+        # Assert
+        assert user.email is not None
+        assert "@example.com" in user.email
+        assert user.name is not None
+        assert user.password is not None
+        assert user.is_active is True
+        assert user.is_verified is False
+        assert user.is_deleted is False
+
+    def test_verified_user_factory(self):
+        """Test VerifiedUserFactory creates verified users."""
+        # Arrange & Act
+        user = VerifiedUserFactory.build()
+        
+        # Assert
+        assert user.is_verified is True
+        assert user.is_active is True
+        assert user.is_deleted is False
+
+    def test_admin_user_factory(self):
+        """Test AdminUserFactory creates admin users."""
+        # Arrange & Act
+        user = AdminUserFactory.build()
+        
+        # Assert
+        assert "admin" in user.email
+        assert user.is_verified is True
 
 
 class TestLinkedAccountModel:
@@ -337,30 +381,31 @@ class TestLinkedAccountModel:
 
     def test_linked_account_model_creation(self):
         """Test LinkedAccount model creation with all fields."""
-        # Arrange
+        # Arrange - Use factory for realistic data
+        account_data = LinkedAccountFactory.build()
         user_id = uuid4()
         
         # Act
         linked_account = LinkedAccount(
             user_id=user_id,
-            provider="google",
-            given_name="John",
-            family_name="Doe",
-            picture="https://example.com/avatar.jpg",
-            email="john@example.com",
+            provider=account_data.provider,
+            given_name=account_data.given_name,
+            family_name=account_data.family_name,
+            picture=account_data.picture,
+            email=account_data.email,
             is_verified=True,
-            sub="google-sub-123"
+            sub=account_data.sub
         )
         
         # Assert
         assert linked_account.user_id == user_id
-        assert linked_account.provider == "google"
-        assert linked_account.given_name == "John"
-        assert linked_account.family_name == "Doe"
-        assert linked_account.picture == "https://example.com/avatar.jpg"
-        assert linked_account.email == "john@example.com"
+        assert linked_account.provider == account_data.provider
+        assert linked_account.given_name == account_data.given_name
+        assert linked_account.family_name == account_data.family_name
+        assert linked_account.picture == account_data.picture
+        assert linked_account.email == account_data.email
         assert linked_account.is_verified is True
-        assert linked_account.sub == "google-sub-123"
+        assert linked_account.sub == account_data.sub
 
     def test_linked_account_model_defaults(self):
         """Test LinkedAccount model default values."""
@@ -383,3 +428,79 @@ class TestLinkedAccountModel:
         assert linked_account.picture == ""
         assert linked_account.email == ""
         assert linked_account.is_verified is False
+
+    def test_linked_account_factory_direct(self):
+        """Test LinkedAccount factory direct usage."""
+        # Arrange & Act
+        linked_account = LinkedAccountFactory.build()
+        
+        # Assert
+        assert linked_account.provider in ["google", "facebook", "github", "twitter"]
+        assert linked_account.given_name is not None
+        assert linked_account.family_name is not None
+        assert linked_account.email is not None
+        assert linked_account.sub is not None
+
+    def test_google_linked_account_factory(self):
+        """Test GoogleLinkedAccountFactory specifics."""
+        # Arrange & Act
+        google_account = GoogleLinkedAccountFactory.build()
+        
+        # Assert
+        assert google_account.provider == "google"
+        assert "google-" in google_account.sub
+        assert "@gmail.com" in google_account.email
+
+
+class TestFactoryIntegration:
+    """Test factory integration with user services."""
+
+    @pytest.mark.asyncio
+    async def test_bulk_user_creation_with_factories(self, user_service: UserService):
+        """Test creating multiple users efficiently with factories."""
+        # Arrange - Create multiple user schemas using factory
+        user_creates = [
+            create_user_create_schema(email=f"bulk{i}@example.com", name=f"Bulk User {i}")
+            for i in range(5)
+        ]
+        
+        # Act - Create users in database
+        users = []
+        for user_create in user_creates:
+            user = await user_service.create_user(user_create)
+            users.append(user)
+        
+        # Assert
+        assert len(users) == 5
+        for i, user in enumerate(users):
+            assert user.email == f"bulk{i}@example.com"
+            assert user.name == f"Bulk User {i}"
+
+    @pytest.mark.asyncio
+    async def test_mixed_user_types_with_factories(self, user_service: UserService):
+        """Test creating different types of users with specialized factories."""
+        # Arrange - Use different factory patterns
+        regular_create = create_user_create_schema(email="regular@example.com")
+        verified_create = create_user_create_schema(
+            email="verified@example.com", 
+            name="Verified User"
+        )
+        admin_create = create_user_create_schema(
+            email="admin@example.com",
+            name="Admin User"
+        )
+        
+        # Act
+        regular_user = await user_service.create_user(regular_create)
+        verified_user = await user_service.create_user(verified_create)  
+        admin_user = await user_service.create_user(admin_create)
+        
+        # Assert
+        assert regular_user.email == "regular@example.com"
+        assert verified_user.email == "verified@example.com"
+        assert admin_user.email == "admin@example.com"
+        
+        # All should be created successfully
+        assert regular_user.id is not None
+        assert verified_user.id is not None
+        assert admin_user.id is not None

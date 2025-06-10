@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     email: str
-    name: Optional[str]
-    password: Optional[str]
+    name: Optional[str] = ""
+    password: Optional[str] = ""
 
 
 class UserUpdate(BaseModel):
@@ -15,7 +15,9 @@ class UserUpdate(BaseModel):
 
 class LinkedAccountCreate(BaseModel):
     provider: str
-    given_name: str
-    family_name: str
-    picture: str
+    given_name: str = ""
+    family_name: str = ""
+    picture: str = ""
     email: str
+    sub: Optional[str] = None
+    is_verified: bool = True

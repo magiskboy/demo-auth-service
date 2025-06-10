@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,13 +11,13 @@ class RoleService:
         self.db: AsyncSession = db
 
     async def create_role(self, role: RoleCreate) -> Role:
-        role = Role(name=role.name, description=role.description)
-        self.db.add(role)
+        role_obj = Role(name=role.name, description=role.description or "")
+        self.db.add(role_obj)
         await self.db.commit()
-        await self.db.refresh(role)
-        return role
+        await self.db.refresh(role_obj)
+        return role_obj
     
-    async def get_role(self, role_id: str) -> Role:
+    async def get_role(self, role_id: str) -> Optional[Role]:
         return await self.db.get(Role, role_id)
     
     async def update_role(self, role_update: RoleUpdate) -> Role:
@@ -25,7 +25,7 @@ class RoleService:
         if not role:
             raise ValueError("Role not found")
         role.name = role_update.name
-        role.description = role_update.description
+        role.description = role_update.description or ""
         self.db.add(role)
         await self.db.commit()
         await self.db.refresh(role)
@@ -38,7 +38,7 @@ class RoleService:
         if filter and filter.description:
             query = query.where(Role.description == filter.description)
         result = await self.db.execute(query)
-        return result.all()
+        return list(result.scalars().all())
 
 
 class PermissionService:
@@ -46,13 +46,13 @@ class PermissionService:
         self.db: AsyncSession = db
 
     async def create_permission(self, permission: PermissionCreate) -> Permission:
-        permission = Permission(name=permission.name, description=permission.description)
-        self.db.add(permission)
+        permission_obj = Permission(name=permission.name, description=permission.description or "")
+        self.db.add(permission_obj)
         await self.db.commit()
-        await self.db.refresh(permission)
-        return permission
+        await self.db.refresh(permission_obj)
+        return permission_obj
     
-    async def get_permission(self, permission_id: str) -> Permission:
+    async def get_permission(self, permission_id: str) -> Optional[Permission]:
         return await self.db.get(Permission, permission_id)
     
     async def update_permission(self, permission_update: PermissionUpdate) -> Permission:
@@ -60,7 +60,7 @@ class PermissionService:
         if not permission:
             raise ValueError("Permission not found")
         permission.name = permission_update.name
-        permission.description = permission_update.description
+        permission.description = permission_update.description or ""
         self.db.add(permission)
         await self.db.commit()
         await self.db.refresh(permission)
@@ -73,7 +73,7 @@ class PermissionService:
         if filter and filter.description:
             query = query.where(Permission.description == filter.description)
         result = await self.db.execute(query)
-        return result.all()
+        return list(result.scalars().all())
 
 
 class RBACService:
