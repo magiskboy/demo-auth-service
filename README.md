@@ -1,8 +1,12 @@
 # OAuth2 Service
 
+## Refs:
+- [https://github.com/magiskboy/oauth2-impl](https://github.com/magiskboy/oauth2-impl)
+- [https://www.nkthanh.dev/posts/oauth2](https://www.nkthanh.dev/posts/oauth2)
+
 A production-ready OAuth2 and OpenID Connect authentication service built with FastAPI, featuring comprehensive logging, RBAC (Role-Based Access Control), and microservice architecture.
 
-## 🚀 Features
+## Features
 
 - **OAuth2 & OpenID Connect**: Full OAuth2 implementation with OpenID Connect support
 - **Single Sign-On (SSO)**: Seamless authentication across multiple applications
@@ -12,7 +16,7 @@ A production-ready OAuth2 and OpenID Connect authentication service built with F
 - **Type Safety**: Full type annotations and validation with Pydantic
 - **Comprehensive Testing**: Factory-based testing with pytest and async support
 
-## 📚 Documentation
+## Documentation
 
 Our documentation is organized into focused sections:
 
@@ -24,7 +28,7 @@ Our documentation is organized into focused sections:
 - **[Deployment](docs/deployment.md)** - Container deployment and Kubernetes orchestration
 
 
-## 🏃‍♂️ Quick Start
+## Quick Start
 
 ```bash
 # Clone the repository
@@ -49,7 +53,7 @@ tail -f logs/oauth2-service-rotating.log | jq
 ```
 
 
-## 🐳 Docker & Kubernetes
+## Docker
 
 ```bash
 # Build container

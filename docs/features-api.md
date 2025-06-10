@@ -4,7 +4,7 @@
 
 The OAuth2 Service provides a comprehensive authentication and authorization platform with modern security features, SSO capabilities, and a robust API for integration.
 
-## 🔑 Core Features
+## Core Features
 
 ### OAuth2 & OpenID Connect
 - **Full OAuth2 Implementation**: Complete OAuth2 server with authorization code, client credentials, and refresh token flows
@@ -30,7 +30,7 @@ The OAuth2 Service provides a comprehensive authentication and authorization pla
 - **Input Validation**: Comprehensive request/response validation with Pydantic
 - **Session Management**: Secure session handling with middleware
 
-## 🌐 OAuth2 Flow
+## OAuth2 Flow
 
 ![OAuth2 Flow](flow.png)
 
@@ -63,7 +63,7 @@ Content-Type: application/json
 }
 ```
 
-## 📡 API Reference
+## API Reference
 
 ### Authentication Endpoints (`/api/v1/auth`)
 
@@ -416,7 +416,7 @@ class ServiceClient:
             return await client.request(method, f"{self.base_url}{path}", **kwargs)
 ```
 
-## 📈 Monitoring & Analytics
+## Monitoring & Analytics
 
 ### API Metrics
 The service provides comprehensive metrics for monitoring:
@@ -429,14 +429,12 @@ The service provides comprehensive metrics for monitoring:
 
 ### Health Checks
 ```http
-GET /health
+GET /healthz
 # Returns service health status
 
-GET /metrics
-# Returns Prometheus-compatible metrics
 ```
 
-## 🔗 Next Steps
+## Next Steps
 
 - **[Project Structure](project-structure.md)** - Learn about the codebase organization
 - **[Logging System](logging.md)** - Understand the comprehensive logging features
