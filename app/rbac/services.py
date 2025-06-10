@@ -17,17 +17,28 @@ class RoleService:
         await self.db.refresh(role)
         return role
     
-    async def update_role(self, role: RoleUpdate) -> Role:
-        role = await self.get_role(role.id)
-        role.name = role.name
-        role.description = role.description
+    async def get_role(self, role_id: str) -> Role:
+        return await self.db.get(Role, role_id)
+    
+    async def update_role(self, role_update: RoleUpdate) -> Role:
+        role = await self.get_role(role_update.id)
+        if not role:
+            raise ValueError("Role not found")
+        role.name = role_update.name
+        role.description = role_update.description
         self.db.add(role)
         await self.db.commit()
         await self.db.refresh(role)
         return role
     
     async def get_roles(self, filter: RoleFilter) -> List[Role]:
-        return await self.db.exec(select(Role).where(Role.name == filter.name, Role.description == filter.description))
+        query = select(Role)
+        if filter and filter.name:
+            query = query.where(Role.name == filter.name)
+        if filter and filter.description:
+            query = query.where(Role.description == filter.description)
+        result = await self.db.execute(query)
+        return result.all()
 
 
 class PermissionService:
@@ -41,17 +52,28 @@ class PermissionService:
         await self.db.refresh(permission)
         return permission
     
-    async def update_permission(self, permission: PermissionUpdate) -> Permission:
-        permission = await self.get_permission(permission.id)
-        permission.name = permission.name
-        permission.description = permission.description
+    async def get_permission(self, permission_id: str) -> Permission:
+        return await self.db.get(Permission, permission_id)
+    
+    async def update_permission(self, permission_update: PermissionUpdate) -> Permission:
+        permission = await self.get_permission(permission_update.id)
+        if not permission:
+            raise ValueError("Permission not found")
+        permission.name = permission_update.name
+        permission.description = permission_update.description
         self.db.add(permission)
         await self.db.commit()
         await self.db.refresh(permission)
         return permission
     
     async def get_permissions(self, filter: PermissionFilter) -> List[Permission]:
-        return await self.db.exec(select(Permission).where(Permission.name == filter.name, Permission.description == filter.description))
+        query = select(Permission)
+        if filter and filter.name:
+            query = query.where(Permission.name == filter.name)
+        if filter and filter.description:
+            query = query.where(Permission.description == filter.description)
+        result = await self.db.execute(query)
+        return result.all()
 
 
 class RBACService:

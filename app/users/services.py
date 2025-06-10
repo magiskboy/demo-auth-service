@@ -20,7 +20,12 @@ class UserService:
         return await self.db.get(User, user_id)
     
     async def get_user_by_email(self, email: str) -> User:
-        return await self.db.exec(select(User).where(User.email == email)).first()
+        result = await self.db.execute(select(User).where(User.email == email))
+        return result.first()
+    
+    async def get_all_users(self) -> List[User]:
+        result = await self.db.execute(select(User).where(User.is_deleted == False))
+        return result.all()
     
     async def update_user(self, user: UserUpdate) -> User:
         user = await self.get_user(user.id)
